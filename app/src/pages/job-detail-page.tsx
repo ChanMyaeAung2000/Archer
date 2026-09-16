@@ -1,0 +1,23 @@
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ArrowLeft, ArrowUpRight, BriefcaseBusiness, CalendarDays, CheckCircle2, MapPin, Send } from "lucide-react";
+import { api } from "@/lib/api";
+import { formatDate, formatMoney } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/components/auth-provider";
+
+export function JobDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: job, isLoading, isError } = useQuery({ queryKey: ["job", id], queryFn: () => api.getJob(id!), enabled: Boolean(id) });
+  const publish = useMutation({ mutationFn: () => api.publishJob(id!), onSuccess: () => navigate("/jobs") });
+  if (isLoading) return <div className="h-96 animate-pulse rounded-3xl bg-secondary/70" />;
+  if (isError || !job) return <Card className="p-12 text-center"><p className="font-semibold">Project not found</p><Link to="/jobs" className="mt-3 inline-block text-sm font-semibold text-primary">Back to jobs</Link></Card>;
+  const isOwner = user?.id === job.client.id;
+  const isDraft = job.status === "DRAFT";
+  return <div className="mx-auto max-w-5xl space-y-6"><Link to="/jobs" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Back to jobs</Link><section className="relative overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-10"><div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl" /><div className="relative"><div className="flex flex-wrap items-center gap-2"><Badge>{job.status}</Badge>{job.category && <Badge variant="secondary">{job.category}</Badge>}</div><div className="mt-5 flex flex-col justify-between gap-7 md:flex-row md:items-end"><div><h1 className="max-w-3xl text-3xl font-semibold tracking-[-.04em] sm:text-4xl">{job.title}</h1><div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"><span className="inline-flex items-center gap-1.5"><BriefcaseBusiness className="h-4 w-4" />{job.client.profile?.name ?? "Archer client"}</span><span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />Posted {formatDate(job.publishedAt ?? job.createdAt)}</span><span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" />Remote friendly</span></div></div><div className="shrink-0"><p className="text-xs font-bold uppercase tracking-[.16em] text-muted-foreground">Budget</p><p className="mt-1 text-2xl font-semibold">{formatMoney(job.budgetAmount, job.budgetCurrency)}</p></div></div></div></section><div className="grid gap-6 lg:grid-cols-[1fr_320px]"><Card className="p-6 sm:p-8"><h2 className="text-lg font-semibold">About the project</h2><p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">{job.description}</p><h3 className="mt-8 text-sm font-semibold">Skills requested</h3><div className="mt-3 flex flex-wrap gap-2">{job.skills.map(({ skill }) => <Badge key={skill.id} variant="outline">{skill.name}</Badge>)}</div></Card><div className="space-y-4"><Card className="p-6"><h2 className="text-sm font-semibold">Project details</h2><div className="mt-5 space-y-4 text-sm"><Detail label="Deadline" value={formatDate(job.deadline)} /><Detail label="Currency" value={job.budgetCurrency} /><Detail label="Status" value={job.status.replace("_", " ")} /></div>{isOwner && isDraft && <Button className="mt-6 w-full" disabled={publish.isPending} onClick={() => publish.mutate()}>{publish.isPending ? "Publishing…" : "Publish project"}<ArrowUpRight className="h-4 w-4" /></Button>}{!isOwner && job.status === "PUBLISHED" && <Link to={`/jobs/${job.id}/propose`} className="mt-6 block"><Button className="w-full"><Send className="h-4 w-4" />Submit proposal</Button></Link>}</Card><div className="flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[.06] p-4"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /><p className="text-xs leading-5 text-muted-foreground">Archer keeps the project brief and budget clear before work begins.</p></div></div></div></div>;
+}
+function Detail({ label, value }: { label: string; value: string }) { return <div className="flex items-center justify-between border-b border-border/70 pb-3 last:border-0 last:pb-0"><span className="text-muted-foreground">{label}</span><span className="font-semibold capitalize">{value}</span></div>; }

@@ -1,0 +1,2 @@
+# Preserve the former package repository histories locally without tracking them
+**/._git-backup/
