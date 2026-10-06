@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
 const links = [
-  { to: "/", key: "overview", icon: LayoutDashboard, end: true },
+  { to: "/home", key: "overview", icon: LayoutDashboard, end: true },
   { to: "/jobs", key: "exploreJobs", icon: Compass },
   { to: "/proposals", key: "proposals", icon: FileText },
   { to: "/projects", key: "projects", icon: FolderKanban },

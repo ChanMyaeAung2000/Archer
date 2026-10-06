@@ -29,7 +29,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "FREELANCER" as "CLIENT" | "FREELANCER" });
 
   async function completeLogin() {
-    const from = (location.state as { from?: string } | null)?.from ?? "/";
+    const from = (location.state as { from?: string } | null)?.from ?? "/home";
     navigate(from, { replace: true });
   }
 
