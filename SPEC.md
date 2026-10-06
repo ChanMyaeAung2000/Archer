@@ -2,7 +2,19 @@
 
 Archer is a freelance marketplace where clients find independent talent, agree on project work, and collaborate through delivery.
 
-This document defines product behavior and feature scope. It is intentionally changeable as product decisions evolve. Engineering boundaries and implementation rules live in `AGENTS.md`; setup and run instructions live in the package READMEs.
+This document defines product behavior and feature scope across Archer's web and mobile clients. It is intentionally changeable as product decisions evolve. Engineering boundaries and implementation rules live in `AGENTS.md`; setup and run instructions live in the package READMEs.
+
+## Product surfaces
+
+Archer has a web client and a native mobile client backed by the same API and product rules:
+
+- **Web:** browser experience in `app/`.
+- **Mobile:** iOS and Android experience in `mobile/`, built with React Native and Expo.
+- **API:** shared source of truth for accounts, permissions, business rules, and project data.
+
+The web and mobile clients support the same client and freelancer roles and core marketplace workflow. Mobile screens should be designed for touch, small screens, and native platform conventions while preserving the product behavior and data rules in this specification. Mobile is not a separate marketplace or a reduced-authority client.
+
+The mobile package is planned; this specification describes its intended behavior and does not claim that it is implemented.
 
 ## Product goals
 
@@ -35,6 +47,8 @@ The product should reserve an admin role for future moderation, account suspensi
 - Sign out and refresh an authenticated session.
 - View and update basic profile information.
 - Support profile headline, bio, location, avatar, languages, skills, and portfolio as the profile experience grows.
+
+On mobile, users can register, sign in, stay signed in across app launches, and sign out. Credentials and refresh tokens must use platform-appropriate secure storage. Account actions provide clear loading, validation, and recoverable network error states.
 
 ### 2. Jobs
 
@@ -146,6 +160,8 @@ MVP notification events include:
 
 Clicking a notification should open the relevant proposal or project workspace. Users can mark one notification or all notifications as read.
 
+Mobile users can review notifications in the app and open the related proposal or project. Push notifications are not required for the MVP; adding them requires a defined permission, delivery, and deep-link experience.
+
 ### 8. Reviews
 
 After a project is completed:
@@ -179,6 +195,32 @@ The following are intentionally excluded until explicitly added to this specific
 - Enterprise organizations and team accounts.
 - File attachments and portfolio file storage.
 - Full admin dashboard.
+- Background location, contacts access, and other device permissions unrelated to an explicitly specified feature.
+
+## Mobile experience requirements
+
+- Support iOS and Android through the Expo app. The mobile client uses the documented `/api/v1` HTTP API and never connects directly to persistence.
+- Use touch-sized controls, safe-area-aware layouts, platform keyboards, and native navigation patterns. Long forms and project details remain usable on narrow screens and with the keyboard open.
+- Provide loading, empty, error, and success states for data-backed screens. Explain recoverable network failures and let users retry. Do not present a failed server mutation as successful.
+- Preserve user input when a recoverable request fails, and make write success clear before navigating away.
+- Support accessible labels, readable contrast, scalable text, and screen-reader navigation for primary workflows.
+- Keep signed-in sessions secure using platform secure storage. Never store passwords or secrets in source control or ordinary app preferences.
+- Treat notification links as untrusted input: validate the destination through the API and signed-in user's authorization before showing private data.
+- Display amounts with their currency code and preserve USD-cent / whole-MMK behavior on every mobile screen.
+- Do not imply that a project amount has been paid, escrowed, or withdrawn.
+
+### Mobile navigation model
+
+The mobile app should provide clear entry points for:
+
+- Home or dashboard overview.
+- Job discovery and job details; clients can also create and manage job briefs.
+- Proposals, with role-appropriate received or sent views and proposal details.
+- Projects and the participant-only workspace, including milestones and messaging.
+- Profile and account actions.
+- Notifications and their related proposal or project destinations.
+
+Navigation may use platform-appropriate tabs, stacks, or another native pattern. Navigation structure must not change authorization rules or hide core workflows from either role.
 
 ## Product acceptance criteria
 
@@ -192,6 +234,9 @@ The MVP is functionally coherent when:
 6. Notifications link to the correct proposal or project.
 7. Unauthorized users cannot access another user’s private proposal, project, milestone, or conversation.
 8. The core workflow works with both USD and MMK.
+9. The core workflow is available in the iOS and Android mobile client through the documented API.
+10. Mobile project, proposal, and notification destinations enforce the same participant and ownership boundaries as web.
+11. Primary mobile workflows remain usable on narrow screens, with the keyboard open, and when requests return a recoverable network error.
 
 ## Decisions to confirm later
 

@@ -1,0 +1,12 @@
+import { useRouter } from 'expo-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Pressable, Text, View } from 'react-native';
+import { Button, Card, Notice, PageHeader, Screen, colors, ui } from '@/components/ui';
+import { api, type Notification } from '@/lib/api';
+export default function NotificationsScreen() {
+  const router = useRouter(); const cache = useQueryClient(); const query = useQuery({ queryKey: ['notifications'], queryFn: api.getNotifications });
+  const markOne = useMutation({ mutationFn: api.markNotificationRead, onSuccess: () => cache.invalidateQueries({ queryKey: ['notifications'] }) });
+  const markAll = useMutation({ mutationFn: api.markAllNotificationsRead, onSuccess: () => cache.invalidateQueries({ queryKey: ['notifications'] }) });
+  function open(item: Notification) { if (!item.readAt) markOne.mutate(item.id); try { const payload = item.payload ? JSON.parse(item.payload) as { proposalId?: string; projectId?: string } : {}; if (payload.proposalId) router.push({ pathname: '/proposals/[id]', params: { id: payload.proposalId } }); else if (payload.projectId) router.push({ pathname: '/projects/[id]', params: { id: payload.projectId } }); } catch { /* Keep the user on notifications if a payload is malformed. */ } }
+  return <Screen scroll><PageHeader eyebrow="Activity" title="Notifications" subtitle="Important updates from your proposals and projects." />{query.data?.some((item) => !item.readAt) ? <Button title="Mark all as read" secondary onPress={() => markAll.mutate()} loading={markAll.isPending} /> : null}{query.isError ? <Notice>Couldn’t load notifications. Check your connection and try again.</Notice> : null}{query.isLoading ? <Card><Text style={ui.small}>Loading notifications…</Text></Card> : null}{!query.isLoading && !query.isError && !query.data?.length ? <Card><Text style={{ color: colors.text, fontWeight: '800' }}>All caught up</Text><Text style={ui.small}>New proposal and project activity will show up here.</Text></Card> : null}{query.data?.map((item) => <Pressable key={item.id} onPress={() => open(item)} accessibilityRole="button" accessibilityLabel={`Open notification: ${item.title}`}><Card style={{ borderColor: item.readAt ? colors.line : '#9b8cff88' }}><View style={ui.row}><Text style={{ flex: 1, color: colors.text, fontWeight: '800' }}>{item.title}</Text>{!item.readAt ? <Text style={ui.tag}>NEW</Text> : null}</View><Text style={ui.small}>{new Date(item.createdAt).toLocaleString()}</Text></Card></Pressable>)}</Screen>;
+}

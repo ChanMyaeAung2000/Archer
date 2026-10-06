@@ -18,9 +18,11 @@ Archer has three independently deployable parts:
 
 - `api/`: Express API, authentication, authorization, business rules, Prisma, SQLite, and persistence.
 - `app/`: React web client. It communicates with the API over documented HTTP endpoints only.
-- `mobile/`: React Native Expo client when implemented. It communicates with the API over documented HTTP endpoints only.
+- `mobile/`: React Native and Expo client for iOS and Android. It communicates with the API over documented HTTP endpoints only. This package is planned until its app scaffold exists.
 
 Each part is expected to become its own repository. Do not import source files across package boundaries. Shared behavior belongs in the API contract or a deliberately shared package, not in ad hoc cross-folder imports.
+
+The web and mobile clients are separate presentation layers for the same product. They share product behavior and API contracts, not UI components or platform-specific source files. Mobile UI must use React Native primitives and native platform capabilities; do not port web DOM, CSS, or browser-only dependencies into `mobile/`.
 
 The API is the authority for validation, permissions, state transitions, money handling, and persistence. Clients may provide immediate UX validation, but must never replace server-side checks.
 
@@ -31,6 +33,11 @@ No client may access Prisma, SQLite, or the API database directly.
 - API: Node.js, TypeScript, Express, Prisma 7, SQLite, JWT authentication, and Zod validation.
 - Web app: React, TypeScript, React Router, TanStack Query, Tailwind CSS, and shadcn-style components using preset `bciwMOyg`.
 - Mobile: React Native, Expo, TypeScript, and TanStack Query.
+- Mobile navigation, forms, and interaction patterns must be suitable for iOS and Android, touch input, safe areas, and on-screen keyboards. Choose libraries that are compatible with the Expo app and document package-specific decisions in `mobile/README.md`.
+- Mobile API URLs and other environment-specific configuration must come from Expo-supported environment configuration. Never embed secrets or production credentials in the client bundle.
+- Store mobile access and refresh tokens with platform secure storage (for example, Expo SecureStore); do not store passwords or authentication tokens in ordinary preferences or source control.
+- Do not add push notification registration, device permissions, background work, or offline writes unless the product behavior and failure/retry rules are specified.
+- Use TanStack Query for server state. Keep the API client responsible for HTTP transport, response/error parsing, and authentication headers; do not duplicate business rules in screen components.
 - API routes are versioned under `/api/v1`.
 - Successful API responses use `{ "data": ..., "meta": ... }` where metadata is useful.
 - API errors use `{ "error": { "code": ..., "message": ..., "details": ... } }`.
@@ -54,9 +61,9 @@ For a feature change:
 
 1. Confirm the behavior belongs in `SPEC.md`; update the feature section when the product contract changes.
 2. Implement server behavior and authorization in `api/` first when data or business rules are involved.
-3. Connect `app/` or `mobile/` through API clients and query/mutation state, not direct database access.
-4. Update package READMEs when setup, routes, environment variables, or user-visible behavior changes.
-5. Run the narrowest relevant checks, then the package build/type check. For cross-package changes, verify both API and client builds.
+3. Connect `app/` or `mobile/` through API clients and query/mutation state, not direct database access. Keep each client usable with its own platform conventions while matching the API's business rules.
+4. Update package READMEs when setup, routes, environment variables, or user-visible behavior changes. The mobile README must document Expo setup, required environment values, and iOS/Android run commands when the package is created.
+5. Run the narrowest relevant checks, then the package build/type check. For cross-package changes, verify the API and each changed client using their documented checks.
 
 Use existing patterns before adding new abstractions. Keep changes focused, preserve unrelated user work, and avoid destructive operations such as resetting the database or deleting data unless explicitly requested.
 
@@ -64,6 +71,8 @@ Use existing patterns before adding new abstractions. Keep changes focused, pres
 
 - New endpoints need validation, authorization, consistent responses, and an error path.
 - New UI states need loading, empty, error, and success behavior.
+- Mobile screens must handle safe areas, keyboard overlap, interrupted/retried requests, accessible control labels, and narrow device widths.
+- Do not claim the mobile surface is complete based on a web implementation or API-only support; the intended iOS/Android user flow must be reachable in the Expo client.
 - Important workflow changes need an end-to-end smoke test or focused integration test.
 - Keep demo data and local-only artifacts clearly separated from source-controlled configuration.
 - Do not claim a feature is complete until its behavior is reachable through the intended client flow and the relevant build/check passes.

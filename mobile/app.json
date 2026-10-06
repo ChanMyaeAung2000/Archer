@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Archer",
+    "slug": "archer-mobile",
+    "version": "1.0.0",
+    "scheme": "archer",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": { "typedRoutes": true },
+    "ios": {
+      "bundleIdentifier": "com.archer.mobile",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.archer.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
