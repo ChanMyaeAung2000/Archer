@@ -18,4 +18,26 @@ import { LandingPage } from "@/pages/landing-page";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
 
-export function App() { return <QueryClientProvider client={queryClient}><BrowserRouter><AuthProvider><Routes><Route path="/" element={<LandingPage />} /><Route path="/login" element={<AuthPage mode="login" />} /><Route path="/register" element={<AuthPage mode="register" />} /><Route element={<RequireAuth />}><Route element={<AppShell />}><Route path="/home" element={<DashboardPage />} /><Route path="/jobs" element={<JobsPage />} /><Route path="/jobs/new" element={<NewJobPage />} /><Route path="/jobs/:id/propose" element={<SubmitProposalPage />} /><Route path="/jobs/:id" element={<JobDetailPage />} /><Route path="/proposals" element={<ProposalsPage />} /><Route path="/proposals/:id" element={<ProposalDetailPage />} /><Route path="/projects" element={<ProjectsPage />} /><Route path="/projects/:id" element={<ProjectDetailPage />} /><Route path="/profile" element={<ProfilePage />} /></Route></Route><Route path="*" element={<Navigate to="/" replace />} /></Routes></AuthProvider></BrowserRouter></QueryClientProvider>; }
+export function App() { 
+    return <QueryClientProvider client={queryClient}>
+        <BrowserRouter><AuthProvider>
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<AuthPage mode="login" />} />
+            <Route path="/register" element={<AuthPage mode="register" />} />
+            <Route element={<RequireAuth />}><Route element={<AppShell />}>
+            <Route path="/home" element={<DashboardPage />} />
+            <Route path="/jobs" element={<JobsPage />} />
+            <Route path="/jobs/new" element={<NewJobPage />} />
+            <Route path="/jobs/:id/propose" element={<SubmitProposalPage />} />
+            < Route path="/jobs/:id" element={<JobDetailPage />} />
+                <Route path="/proposals" element={<ProposalsPage />} />
+                <Route path="/proposals/:id" element={<ProposalDetailPage />} />
+                <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/projects/:id" element={<ProjectDetailPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    </Route></Route><Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                    </AuthProvider>
+                    </BrowserRouter>
+                    </QueryClientProvider>; }

@@ -14,7 +14,9 @@ cp .env.example .env
 npm start
 ```
 
-Set `EXPO_PUBLIC_API_URL` to a host reachable from the device. The example uses `http://localhost:4000/api/v1` for a local host/simulator. For an Android emulator, use `http://10.0.2.2:4000/api/v1`; for a physical device, use the development computer's LAN IP. Start the API before signing in.
+Start the API in another terminal with `cd api && npm run dev`. When `EXPO_PUBLIC_API_URL` is empty, the app uses the host address Expo Go reports for the development server, which lets a physical phone on the same Wi-Fi reach the computer's API. Android emulators use `http://10.0.2.2:4000/api/v1`; iOS simulators use `http://localhost:4000/api/v1`.
+
+If automatic host detection does not work, set `EXPO_PUBLIC_API_URL` in `mobile/.env` to `http://<your-computer-LAN-IP>:4000/api/v1` (for example `http://192.168.1.20:4000/api/v1`). Keep the phone and computer on the same Wi-Fi and allow inbound connections to port 4000 through the computer's firewall. After changing `.env`, restart Expo with `npm start -- --clear`. Check connectivity by opening `http://<your-computer-LAN-IP>:4000/health` in the phone's browser; it should return JSON with status `ok`.
 
 Use the Expo CLI prompt to open the app in an iOS simulator, Android emulator, or Expo Go. iOS simulator builds require macOS. For native development builds, use the documented Expo `run:ios` or `run:android` workflow.
 

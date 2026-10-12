@@ -4,6 +4,7 @@
     "slug": "archer-mobile",
     "version": "1.0.0",
     "scheme": "archer",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",

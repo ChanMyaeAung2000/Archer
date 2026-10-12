@@ -1,6 +1,26 @@
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+function getApiUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+  if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+
+  // Expo Go exposes the dev server host, which is usually the computer's LAN
+  // address. Reuse it so a physical phone can reach the API on the same LAN.
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(':')[0];
+    if (host && !host.endsWith('.exp.direct') && !host.endsWith('.expo.dev')) {
+      return `http://${host}:4000/api/v1`;
+    }
+  }
+
+  // Android emulators use this alias to reach the development computer.
+  return `http://${Platform.OS === 'android' ? '10.0.2.2' : 'localhost'}:4000/api/v1`;
+}
+
+const API_URL = getApiUrl();
 const ACCESS_KEY = 'archer.accessToken';
 const REFRESH_KEY = 'archer.refreshToken';
 
@@ -53,7 +73,7 @@ async function request<T>(path: string, init: RequestInit = {}, retry = true): P
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
   let response: Response;
   try { response = await fetch(`${API_URL}${path}`, { ...init, headers }); }
-  catch { throw new ApiError('Unable to reach Archer. Check your connection and try again.', 0, 'NETWORK_ERROR'); }
+  catch { throw new ApiError(`Unable to reach the Archer API at ${API_URL}. Make sure the API is running and this device can reach that address.`, 0, 'NETWORK_ERROR'); }
 
   if (response.status === 401 && retry && path !== '/auth/login' && path !== '/auth/register' && path !== '/auth/refresh') {
     const refreshToken = await tokenStore.getRefresh();
