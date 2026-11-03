@@ -4,6 +4,8 @@ Standalone REST API for Archer, built with Express, TypeScript, Prisma 7, and SQ
 
 For product behavior and project-wide boundaries, see [../SPEC.md](../SPEC.md) and [../AGENTS.md](../AGENTS.md).
 
+**[API.md](./API.md)** is the machine-oriented API contract for AI agents and developers: full endpoint reference, request/response shapes, auth flow, error envelope, enums, and a copy-pasteable workflow walkthrough.
+
 ## Local setup
 
 Requirements: Node.js 20+.
